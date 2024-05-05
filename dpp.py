@@ -14,11 +14,11 @@ def dpp_sampling(L, k, verbose=False):
 
 def map_inference_dpp_greedy(kernel_matrix, max_length, epsilon=1E-10):
     """
-    Our proposed fast implementation of the greedy algorithm
-    :param kernel_matrix: 2-d array
-    :param max_length: positive int
-    :param epsilon: small positive scalar
-    :return: list
+    Greedy algorithm for MAP inference in DPP from the paper https://arxiv.org/abs/1709.05135
+        :param kernel_matrix: 2-d array
+        :param max_length: positive int
+        :param epsilon: small positive scalar
+        :return: list
     """
     item_size = kernel_matrix.shape[0]
     cis = np.zeros((max_length, item_size))
@@ -52,11 +52,11 @@ def map_inference_dpp_greedy(kernel_matrix, max_length, epsilon=1E-10):
 def map_inference_dpp_sw(kernel_matrix, window_size, max_length, epsilon=1E-10):
     """
     Sliding window version of the greedy algorithm
-    :param kernel_matrix: 2-d array
-    :param window_size: positive int
-    :param max_length: positive int
-    :param epsilon: small positive scalar
-    :return: list
+        :param kernel_matrix: 2-d array
+        :param window_size: positive int
+        :param max_length: positive int
+        :param epsilon: small positive scalar
+        :return: list
     """
     item_size = kernel_matrix.shape[0]
     v = np.zeros((max_length, max_length))
