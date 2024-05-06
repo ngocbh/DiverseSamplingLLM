@@ -5,6 +5,8 @@ import numpy as np
 import fire
 import pickle
 import time
+import torch
+import random
 
 from typing import List
 from dataclasses import dataclass
@@ -32,10 +34,20 @@ def preprocess_rocstories(df, max_samples=1000):
         })
     return data
 
+
 def load_rocstories(max_samples=1000):
     df = pd.read_csv('datasets/ROCStories/dataset_2017.csv')
     dataset = preprocess_rocstories(df, max_samples=max_samples)
     return dataset
+
+
+def seed_everything(seed):
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 def evaluate(dataset, decoding_fn, embedding_model, k, num_seeds=1):
@@ -117,9 +129,9 @@ method_map = {
 }
 
 method_name_map = {
-    'naive': 'Naive Decoding',
+    'naive': 'Temperature Sampling',
     'dpp_sampling': 'DPP Sampling',
-    'dpp_map_greedy': 'DPP MAP Greedy Inference',
+    'dpp_map_greedy': 'DPP MAP Greedy',
     'dpp_map_ls': 'DPP MAP Local Search',
 }
 
@@ -132,9 +144,10 @@ class Args:
     run_id: int = 0
     methods: tuple[str] = ('naive', 'dpp_sampling', 'dpp_map_greedy', 'dpp_map_ls')
     rerun: bool = False
+    seed: int = 42
 
     # DPP specific params
-    dpp_params_n: int = 20
+    dpp_params_n: int = 50
 
     def update(self, **kwargs):
         methods = kwargs.get('methods', self.methods)
@@ -153,9 +166,11 @@ def main(**kwargs):
         args.num_seeds = 1
         args.rerun = True
         args.k = 2
+        args.dpp_params_n = 10
     wdir = f'./results/{args.run_id}/'
 
     print(f"Running with args: {args}")
+    seed_everything(args.seed)
 
     os.makedirs(wdir, exist_ok=True)
     language_model = Mistral()
@@ -171,6 +186,7 @@ def main(**kwargs):
 
     plot(res, method_names, 'cosine_similarity', 'neg_log_probs', y_scale='log', save_path=osp.join(wdir, 'cosine_log_probs.png'))
     plot(res, method_names, 'dpp_score', 'neg_log_probs', y_scale='log', save_path=osp.join(wdir, 'dpp_log_probs.png'))
+    plot(res, method_names, 'lp_distance', 'neg_log_probs', y_scale='log', save_path=osp.join(wdir, 'lp_dist_log_probs.png'))
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ from metrics import metric_map
 
 
 def plot(rescols, labels, x_metric, y_metric, x_scale='linear', y_scale='linear', save_path=None, show=False):
+    plt.rcParams.update({'font.size': 15})
     fig, ax = plt.subplots()
     for rescol, label in zip(rescols, labels):
         df = rescol.get_df()

@@ -8,6 +8,7 @@ def naive_decoding(prompt, language_model, embedding_model, k, temperature=0.7):
         temperature=temperature,
         num_samples=k,
     )
+
     return output
 
 
@@ -21,10 +22,15 @@ def dpp_decoding(prompt, language_model, embedding_model, k, method='sampling', 
     log_probs = output['logprobs']
     D = np.diag(np.exp(- log_probs ** 2 / kernel_width ** 2))
     S = (embeddings @ embeddings.T) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(embeddings, axis=1).T)
+    gamma = 0.2
     L = gamma * S + (1 - gamma) * D
 
     if method == 'sampling':
-        dpp_samples = dpp_sampling(L, k)
+        # there is a bug in the dpp sampling code, potentially due to the matrix being singular
+        try:
+            dpp_samples = dpp_sampling(L, k)
+        except:
+            dpp_samples = np.random.choice(len(embeddings), k, replace=False)
     elif method == 'map_ls':
         dpp_samples, _, _, _, _, _ = map_inference_dpp_local_search_2(L, k)
     elif method == 'map_greedy':
@@ -32,6 +38,7 @@ def dpp_decoding(prompt, language_model, embedding_model, k, method='sampling', 
 
     generated_texts = [output['generated_text'][i] for i in dpp_samples]
     logprogs = output['logprobs'][dpp_samples]
+
     return {
         'generated_text': generated_texts,
         'logprobs': logprogs,
