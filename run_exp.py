@@ -124,15 +124,13 @@ def dpp_decoding_fn(wdir, dataset, language_model, embedding_model, args, method
 method_map = {
     'naive': naive_decoding_fn,
     'dpp_sampling': dpp_decoding_fn,
-    'dpp_map_greedy': partial(dpp_decoding_fn, method='map_greedy'),
     'dpp_map_ls': partial(dpp_decoding_fn, method='map_ls'),
 }
 
 method_name_map = {
     'naive': 'Temperature Sampling',
     'dpp_sampling': 'DPP Sampling',
-    'dpp_map_greedy': 'DPP MAP Greedy',
-    'dpp_map_ls': 'DPP MAP Local Search',
+    'dpp_map_ls': 'DPP MAP Inference',
 }
 
 
@@ -142,7 +140,7 @@ class Args:
     k: int = 5
     num_seeds: int = 5
     run_id: int = 0
-    methods: tuple[str] = ('naive', 'dpp_sampling', 'dpp_map_greedy', 'dpp_map_ls')
+    methods: tuple[str] = ('naive', 'dpp_sampling', 'dpp_map_ls')
     rerun: bool = False
     seed: int = 42
 
